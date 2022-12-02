@@ -52,3 +52,19 @@ async function appendProductDetails() {
 }
 
 appendProductDetails();
+
+
+const quantityInput = document.getElementById("quantity");
+const addToCartBtn = document.getElementById("addToCart");
+
+addToCartBtn.addEventListener('click', function () {
+    const color = itemColorPicker.value;
+    const quantity = quantityInput.value;
+    let order = {
+        id: id,
+        color: color,
+        quantity: quantity
+    };
+    let storedOrder = JSON.stringify(order);
+    localStorage.setItem(`${id} - ${order.color}`, storedOrder);
+})
