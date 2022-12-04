@@ -85,10 +85,16 @@ const cityInput = document.getElementById("city");
 const emailInput = document.getElementById("email");
 const orderBtn = document.getElementById("order");
 
+
+firstNameInput.addEventListener("change", function () {
+    if (!/^[a-zéèêàâôùûìî-]+$/i.test(firstNameInput.value)) {
+        alert("Le prénom n'est pas au bon format");
+        firstNameInput.value = "";
+    }
+})
 // /^[a-zéèêàâôùûìî-]+$/i test prénom, nom, ville
 // /^\d+[a-zA-Z]*(( )?/w+)+$/ test adresse
 // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ test adresse email
-
 
 
 async function sendOrder(request) {
@@ -112,24 +118,28 @@ async function sendOrder(request) {
 orderBtn.addEventListener("click", async function (e) {
     try {
         e.preventDefault();
-        const cartItems = document.querySelectorAll(".cart__item");
-        let contact = {
-            firstName: firstNameInput.value,
-            lastName: lastNameInput.value,
-            address: addressInput.value,
-            city: cityInput.value,
-            email: emailInput.value
+        if (firstNameInput.value && lastNameInput.value && addressInput.value && emailInput.value && cityInput.value) {
+            const cartItems = document.querySelectorAll(".cart__item");
+            let contact = {
+                firstName: firstNameInput.value,
+                lastName: lastNameInput.value,
+                address: addressInput.value,
+                city: cityInput.value,
+                email: emailInput.value
+            }
+            let products = [];
+            for (let i = 0; i < cartItems.length; i++) {
+                products.push(cartItems[i].dataset.id);
+            }
+            let body = {
+                contact: contact,
+                products: products
+            }
+            const orderInfo = await sendOrder(body);
+            window.location = `./confirmation.html?orderId=${orderInfo.orderId}`
+        } else {
+            alert("Veuillez renseigner tous les champs du formulaire")
         }
-        let products = [];
-        for (let i = 0; i < cartItems.length; i++) {
-            products.push(cartItems[i].dataset.id);
-        }
-        let body = {
-            contact: contact,
-            products: products
-        }
-        const orderInfo = await sendOrder(body);
-        window.location = `./confirmation.html?orderId=${orderInfo.orderId}`
     } catch (error) {
         console.log(error);
     }
