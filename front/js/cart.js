@@ -1,10 +1,14 @@
 const cartDisplay = document.getElementById("cart__items");
+const totalQuantityDisplay = document.getElementById("totalQuantity");
+let totalQuantityValue = 0;
+const totalPriceDisplay = document.getElementById("totalPrice");
+let totalPriceValue = 0;
+let individualItemQuantity = [];
 
 async function getProduct(id) {
     try {
         const response = await fetch(`http://127.0.0.1:3000/api/products/${id}`);
-        const product = await response.json();
-        return product;
+        return await response.json();
     }
     catch (e) {
         console.log(e);
@@ -21,7 +25,7 @@ function appendProduct(product, cartDetails) {
                   <div class="cart__item__content__description">
                     <h2>${product.name}</h2>
                     <p>${cartDetails.color}</p>
-                    <p>${product.price}</p>
+                    <p>${product.price} €</p>
                   </div>
                   <div class="cart__item__content__settings">
                     <div class="cart__item__content__settings__quantity">
@@ -42,8 +46,14 @@ async function displayCartProducts() {
             const jsonItem = localStorage.getItem(localStorage.key(i));
             const cartDetails = JSON.parse(jsonItem);
             const product = await getProduct(cartDetails.id);
+            const productQuantity = parseInt(cartDetails.quantity);
+            totalQuantityValue += productQuantity;
+            totalPriceValue += product.price * productQuantity;
+            individualItemQuantity.push(productQuantity);
             appendProduct(product, cartDetails);
         }
+        totalQuantityDisplay.innerText = totalQuantityValue;
+        totalPriceDisplay.innerText = totalPriceValue;
     } catch (error) {
         console.log(error);
     }
@@ -51,28 +61,57 @@ async function displayCartProducts() {
 
 await displayCartProducts();
 
+
 const cartQuantityInputs = document.querySelectorAll(".itemQuantity");
 const cartDeleteBtns = document.querySelectorAll(".deleteItem");
 
-for (let qtyInput of cartQuantityInputs) {
-    qtyInput.addEventListener("change", function () {
-        let newQuantity = this.value;
-        const parentElement = this.closest('article');
-        let id = parentElement.dataset.id;
-        let color = parentElement.dataset.color;
-        const oldCartDetailsJson = localStorage.getItem(`${id} - ${color}`);
-        const oldCartDetails = JSON.parse(oldCartDetailsJson);
-        oldCartDetails.quantity = newQuantity;
-        const newCartDetails = JSON.stringify(oldCartDetails);
-        localStorage.setItem(`${id} - ${color}`, newCartDetails)
+function getCartDetails(id, color) {
+    const cartDetailsJson = localStorage.getItem(`${id} - ${color}`);
+    return JSON.parse(cartDetailsJson);
+}
+
+async function getProductPrice(id) {
+    const product = await getProduct(id);
+    return parseInt(product.price);
+}
+
+function updateTotalPrice(price, quantity) {
+    totalPriceValue -= price * quantity;
+    totalPriceDisplay.innerText = totalPriceValue;
+}
+
+function updateTotalQuantity(quantity) {
+    totalQuantityValue -= quantity;
+    totalQuantityDisplay.innerText = totalQuantityValue;
+}
+
+function getIdAndColor(element) {
+    const parentElement = element.closest('article');
+    const id = parentElement.dataset.id;
+    const color = parentElement.dataset.color;
+    return { id: id, color: color };
+}
+
+for (let i = 0; i < cartQuantityInputs.length; i++) {
+    cartQuantityInputs[i].addEventListener("change", async function () {
+        const newQuantity = parseInt(this.value);
+        const quantityDifference = individualItemQuantity[i] - newQuantity;
+        const { id, color } = getIdAndColor(this);
+        const cartDetails = getCartDetails(id, color);
+        cartDetails.quantity = newQuantity;
+        localStorage.setItem(`${id} - ${color}`, JSON.stringify(cartDetails))
+        updateTotalPrice(await getProductPrice(id), quantityDifference);
+        updateTotalQuantity(quantityDifference);
+        individualItemQuantity[i] = newQuantity;
     })
 }
 
-for (let deleteBtn of cartDeleteBtns) {
-    deleteBtn.addEventListener("click", function () {
-        const parentElement = this.closest('article');
-        let id = parentElement.dataset.id;
-        let color = parentElement.dataset.color;
+for (let i = 0; i < cartDeleteBtns.length; i++) {
+    cartDeleteBtns[i].addEventListener("click", async function () {
+        const currentQuantity = individualItemQuantity[i];
+        const { id, color } = getIdAndColor(this);
+        updateTotalPrice(await getProductPrice(id), currentQuantity);
+        updateTotalQuantity(currentQuantity);
         parentElement.remove();
         localStorage.removeItem(`${id} - ${color}`);
     })
