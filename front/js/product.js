@@ -58,13 +58,20 @@ const quantityInput = document.getElementById("quantity");
 const addToCartBtn = document.getElementById("addToCart");
 
 addToCartBtn.addEventListener('click', function () {
-    const color = itemColorPicker.value;
-    const quantity = quantityInput.value;
-    let order = {
-        id: id,
-        color: color,
-        quantity: quantity
-    };
-    let storedOrder = JSON.stringify(order);
-    localStorage.setItem(`${id} - ${order.color}`, storedOrder);
+    if (!Number.isInteger(parseFloat(quantityInput.value)) || quantityInput.value < 1 || quantityInput.value > 100) {
+        alert("La quantité d'articles doit être un nombre entier compris entre 1 et 100");
+        quantityInput.value = 0;
+    } else if (!itemColorPicker.value) {
+        alert("Veuillez choisir une couleur.")
+    } else {
+        const color = itemColorPicker.value;
+        const quantity = quantityInput.value;
+        let order = {
+            id: id,
+            color: color,
+            quantity: quantity
+        };
+        let storedOrder = JSON.stringify(order);
+        localStorage.setItem(`${id} - ${order.color}`, storedOrder);
+    }
 })
