@@ -109,10 +109,10 @@ for (let i = 0; i < cartQuantityInputs.length; i++) {
 for (let i = 0; i < cartDeleteBtns.length; i++) {
     cartDeleteBtns[i].addEventListener("click", async function () {
         const currentQuantity = individualItemQuantity[i];
-        const { id, color } = getIdAndColor(this);
+        let { id, color } = getIdAndColor(this);
         updateTotalPrice(await getProductPrice(id), currentQuantity);
         updateTotalQuantity(currentQuantity);
-        parentElement.remove();
+        this.closest("article").remove();
         localStorage.removeItem(`${id} - ${color}`);
     })
 }
@@ -127,10 +127,36 @@ const orderBtn = document.getElementById("order");
 
 firstNameInput.addEventListener("change", function () {
     if (!/^[a-zéèêàâôùûìî-]+$/i.test(firstNameInput.value)) {
-        alert("Le prénom n'est pas au bon format");
+        alert("Le prénom n'est pas au bon format.");
         firstNameInput.value = "";
     }
 })
+lastNameInput.addEventListener("change", function () {
+    if (!/^[a-zéèêàâôùûìî-]+$/i.test(lastNameInput.value)) {
+        alert("Le nom de famille n'est pas au bon format.");
+        lastNameInput.value = "";
+    }
+})
+
+addressInput.addEventListener("change", function () {
+    if (!/^\d+[a-zA-Z]*(\s{1}\w+)+$/.test(addressInput.value)) {
+        alert("L'adresse n'est pas au bon format.");
+        addressInput.value = "";
+    }
+})
+cityInput.addEventListener("change", function () {
+    if (!/^[a-zéèêàâôùûìî-]+$/i.test(cityInput.value)) {
+        alert("Le nom de ville n'est pas au bon format.");
+        cityInput.value = "";
+    }
+})
+emailInput.addEventListener("change", function () {
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailInput.value)) {
+        alert("L'adresse email n'est pas au bon format.");
+        emailInput.value = "";
+    }
+})
+
 // /^[a-zéèêàâôùûìî-]+$/i test prénom, nom, ville
 // /^\d+[a-zA-Z]*(( )?/w+)+$/ test adresse
 // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ test adresse email
