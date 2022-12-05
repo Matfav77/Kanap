@@ -18,8 +18,7 @@ const itemDisplay = document.getElementById("items");
 async function getAllProducts() {
     try {
         const res = await fetch("http://127.0.0.1:3000/api/products");
-        const allKanaps = await res.json();
-        return allKanaps;
+        return await res.json();
     }
     catch (error) {
         console.log(error);

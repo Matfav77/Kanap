@@ -10,8 +10,7 @@ const itemColorPicker = document.getElementById("colors");
 async function getProduct() {
     try {
         const response = await fetch(`http://127.0.0.1:3000/api/products/${id}`);
-        const product = await response.json();
-        return product;
+        return await response.json();
     }
     catch (e) {
         console.log(e);
@@ -57,6 +56,11 @@ appendProductDetails();
 const quantityInput = document.getElementById("quantity");
 const addToCartBtn = document.getElementById("addToCart");
 
+function registerOrderToCart(key, order) {
+    const orderJson = JSON.stringify(order);
+    localStorage.setItem(key, orderJson);
+}
+
 addToCartBtn.addEventListener('click', function () {
     if (!Number.isInteger(parseFloat(quantityInput.value)) || quantityInput.value < 1 || quantityInput.value > 100) {
         alert("La quantité d'articles doit être un nombre entier compris entre 1 et 100");
@@ -65,13 +69,27 @@ addToCartBtn.addEventListener('click', function () {
         alert("Veuillez choisir une couleur.")
     } else {
         const color = itemColorPicker.value;
-        const quantity = quantityInput.value;
-        let order = {
-            id: id,
-            color: color,
-            quantity: quantity
-        };
-        let storedOrder = JSON.stringify(order);
-        localStorage.setItem(`${id} - ${order.color}`, storedOrder);
+        const quantity = parseInt(quantityInput.value);
+        const storageKey = `${id} - ${color}`;
+        if (localStorage.getItem(storageKey)) {
+            const storedItem = JSON.parse(localStorage.getItem(storageKey));
+            if (storedItem.quantity + quantity > 100) {
+                alert(`Vous ne pouvez avoir plus de 100 exemplaires d'un même produit dans le panier. Vous avez déjà ${storedItem.quantity} exemplaires de ce produit dans le panier. Vous pouvez en ajouter ${100 - storedItem.quantity} au maximum.`);
+                quantityInput.value = 0;
+            } else {
+                storedItem.quantity += quantity;
+                registerOrderToCart(storageKey, storedItem);
+                quantityInput.value = 0;
+            }
+        }
+        else {
+            let order = {
+                id: id,
+                color: color,
+                quantity: quantity
+            };
+            registerOrderToCart(storageKey, order);
+            quantityInput.value = 0;
+        }
     }
 })
