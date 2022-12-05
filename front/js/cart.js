@@ -71,8 +71,12 @@ function getCartDetails(id, color) {
 }
 
 async function getProductPrice(id) {
-    const product = await getProduct(id);
-    return parseInt(product.price);
+    try {
+        const product = await getProduct(id);
+        return parseInt(product.price);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 function updateTotalPrice(price, quantity) {
@@ -94,26 +98,41 @@ function getIdAndColor(element) {
 
 for (let i = 0; i < cartQuantityInputs.length; i++) {
     cartQuantityInputs[i].addEventListener("change", async function () {
-        const newQuantity = parseInt(this.value);
-        const quantityDifference = individualItemQuantity[i] - newQuantity;
-        const { id, color } = getIdAndColor(this);
-        const cartDetails = getCartDetails(id, color);
-        cartDetails.quantity = newQuantity;
-        localStorage.setItem(`${id} - ${color}`, JSON.stringify(cartDetails))
-        updateTotalPrice(await getProductPrice(id), quantityDifference);
-        updateTotalQuantity(quantityDifference);
-        individualItemQuantity[i] = newQuantity;
+        try {
+            const newQuantity = parseFloat(this.value);
+            const storedQuantity = individualItemQuantity[i];
+            if (!Number.isInteger(newQuantity) || this.value < 1 || this.value > 100) {
+                alert("La quantité d'articles doit être un nombre entier compris entre 1 et 100");
+                this.value = storedQuantity;
+            }
+            else {
+                const quantityDifference = storedQuantity - newQuantity;
+                const { id, color } = getIdAndColor(this);
+                const cartDetails = getCartDetails(id, color);
+                cartDetails.quantity = newQuantity;
+                localStorage.setItem(`${id} - ${color}`, JSON.stringify(cartDetails))
+                updateTotalPrice(await getProductPrice(id), quantityDifference);
+                updateTotalQuantity(quantityDifference);
+                individualItemQuantity[i] = newQuantity;
+            }
+        } catch (error) {
+            console.log(error);
+        }
     })
 }
 
 for (let i = 0; i < cartDeleteBtns.length; i++) {
     cartDeleteBtns[i].addEventListener("click", async function () {
-        const currentQuantity = individualItemQuantity[i];
-        let { id, color } = getIdAndColor(this);
-        updateTotalPrice(await getProductPrice(id), currentQuantity);
-        updateTotalQuantity(currentQuantity);
-        this.closest("article").remove();
-        localStorage.removeItem(`${id} - ${color}`);
+        try {
+            const currentQuantity = individualItemQuantity[i];
+            let { id, color } = getIdAndColor(this);
+            updateTotalPrice(await getProductPrice(id), currentQuantity);
+            updateTotalQuantity(currentQuantity);
+            this.closest("article").remove();
+            localStorage.removeItem(`${id} - ${color}`);
+        } catch (error) {
+            console.log(error);
+        }
     })
 }
 
