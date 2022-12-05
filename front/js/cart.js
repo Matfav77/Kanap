@@ -141,8 +141,6 @@ const lastNameInput = document.getElementById("lastName");
 const addressInput = document.getElementById("address");
 const cityInput = document.getElementById("city");
 const emailInput = document.getElementById("email");
-const orderBtn = document.getElementById("order");
-
 
 firstNameInput.addEventListener("change", function () {
     if (!/^[a-zéèêàâôùûìî-]+$/i.test(firstNameInput.value)) {
@@ -151,14 +149,14 @@ firstNameInput.addEventListener("change", function () {
     }
 })
 lastNameInput.addEventListener("change", function () {
-    if (!/^[a-zéèêàâôùûìî-]+$/i.test(lastNameInput.value)) {
+    if (!/^[a-zçéèêàâôùûìî-]+$/i.test(lastNameInput.value)) {
         alert("Le nom de famille n'est pas au bon format.");
         lastNameInput.value = "";
     }
 })
 
 addressInput.addEventListener("change", function () {
-    if (!/^\d+[a-zA-Z]*(\s{1}\w+)+$/.test(addressInput.value)) {
+    if (!/^\d+[a-z]*(\s{1}[a-zçéèêàâôùûìî-]+)+$/i.test(addressInput.value)) {
         alert("L'adresse n'est pas au bon format.");
         addressInput.value = "";
     }
@@ -180,6 +178,7 @@ emailInput.addEventListener("change", function () {
 // /^\d+[a-zA-Z]*(( )?/w+)+$/ test adresse
 // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ test adresse email
 
+const orderBtn = document.getElementById("order");
 
 async function sendOrder(request) {
     try {

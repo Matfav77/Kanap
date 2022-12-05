@@ -40,22 +40,26 @@ async function getAllProducts() {
 //     itemDisplay.appendChild(item);
 // }
 
-function appendKanap(kanap) {
+function appendProduct(product) {
     itemDisplay.innerHTML += `
-    <a href="./product.html?id=${kanap._id}">
+    <a href="./product.html?id=${product._id}">
             <article>
-              <img src="${kanap.imageUrl}" alt="${kanap.altTxt}">
-              <h3 class="productName">${kanap.name}</h3>
-              <p class="productDescription">${kanap.description}</p>
+              <img src="${product.imageUrl}" alt="${product.altTxt}">
+              <h3 class="productName">${product.name}</h3>
+              <p class="productDescription">${product.description}</p>
             </article>
           </a>`;
 }
 
-async function displayAllKanaps() {
-    const allKanaps = await getAllProducts();
-    for (let kanap of allKanaps) {
-        appendKanap(kanap);
+async function displayAllProducts() {
+    try {
+        const allProducts = await getAllProducts();
+        for (let product of allProducts) {
+            appendProduct(product);
+        }
+    } catch (error) {
+        console.log(error);
     }
 }
 
-displayAllKanaps();
+displayAllProducts();
