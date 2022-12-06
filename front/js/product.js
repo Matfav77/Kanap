@@ -80,6 +80,7 @@ addToCartBtn.addEventListener('click', function () {
                 storedItem.quantity += quantity;
                 registerOrderToCart(storageKey, storedItem);
                 quantityInput.value = 0;
+                alert(`Vous avez ajouté ${quantity} exemplaires de ce produit à votre panier. Votre panier en contient à présent ${storedItem.quantity} exemplaires.`);
             }
         }
         else {
@@ -90,6 +91,7 @@ addToCartBtn.addEventListener('click', function () {
             };
             registerOrderToCart(storageKey, order);
             quantityInput.value = 0;
+            alert("Votre sélection a bien été ajoutée au panier !")
         }
     }
 })
