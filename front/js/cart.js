@@ -18,7 +18,11 @@ class Cart {
     constructor() {
         let cart = localStorage.getItem("cart");
         if (!cart) this.cart = []
-        else this.cart = JSON.parse(cart);
+        else this.cart = JSON.parse(cart).sort((a, b) => {
+            if (a.id < b.id) return -1
+            else if (a.id > b.id) return 1
+            else return 0
+        });
     }
 
     save() {
@@ -40,8 +44,8 @@ class Cart {
     }
 
     changeQuantity(id, color, quantity) {
-        let foundProduct = this.getItem(id, color)
-        foundProduct.quantity = quantity;
+        let productQuantity = this.getQuantity(id, color);
+        productQuantity = quantity;
         this.save()
     }
 
