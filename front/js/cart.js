@@ -3,9 +3,8 @@ const totalQuantityDisplay = document.getElementById("totalQuantity");
 let totalQuantityValue = 0;
 const totalPriceDisplay = document.getElementById("totalPrice");
 let totalPriceValue = 0;
-let individualItemQuantity = [];
 
-async function getProduct(id) {
+async function getProductDetails(id) {
     try {
         const response = await fetch(`http://127.0.0.1:3000/api/products/${id}`);
         return await response.json();
@@ -15,17 +14,52 @@ async function getProduct(id) {
     }
 }
 
-function appendProduct(product, cartDetails) {
+class Cart {
+    constructor() {
+        let cart = localStorage.getItem("cart");
+        if (!cart) this.cart = []
+        else this.cart = JSON.parse(cart);
+    }
+
+    save() {
+        localStorage.setItem("cart", JSON.stringify(this.cart))
+    }
+
+    getItem(id, color) {
+        return this.cart.find(e => e.id === id && e.color === color)
+    }
+
+    remove(id, color) {
+        this.cart = this.cart.filter(product => product.id != id || product.color != color);
+        this.save();
+    }
+
+    getQuantity(id, color) {
+        let foundProduct = this.getItem(id, color);
+        return foundProduct.quantity;
+    }
+
+    changeQuantity(id, color, quantity) {
+        let foundProduct = this.getItem(id, color)
+        foundProduct.quantity = quantity;
+        this.save()
+    }
+
+}
+
+let cart = new Cart();
+
+function appendProduct(productDetails, cartDetails) {
     cartDisplay.innerHTML += `
-    <article class="cart__item" data-id="${product._id}" data-color="${cartDetails.color}">
+    <article class="cart__item" data-id="${productDetails._id}" data-color="${cartDetails.color}">
                 <div class="cart__item__img">
-                  <img src="${product.imageUrl}" alt="${product.altTxt}">
+                  <img src="${productDetails.imageUrl}" alt="${productDetails.altTxt}">
                 </div>
                 <div class="cart__item__content">
                   <div class="cart__item__content__description">
-                    <h2>${product.name}</h2>
+                    <h2>${productDetails.name}</h2>
                     <p>${cartDetails.color}</p>
-                    <p>${product.price} €</p>
+                    <p>${productDetails.price} €</p>
                   </div>
                   <div class="cart__item__content__settings">
                     <div class="cart__item__content__settings__quantity">
@@ -42,15 +76,12 @@ function appendProduct(product, cartDetails) {
 
 async function displayCartProducts() {
     try {
-        for (let i = 0; i < localStorage.length; i++) {
-            const jsonItem = localStorage.getItem(localStorage.key(i));
-            const cartDetails = JSON.parse(jsonItem);
-            const product = await getProduct(cartDetails.id);
-            const productQuantity = parseInt(cartDetails.quantity);
-            totalQuantityValue += productQuantity;
-            totalPriceValue += product.price * productQuantity;
-            individualItemQuantity.push(productQuantity);
-            appendProduct(product, cartDetails);
+        for (let cartDetails of cart.cart) {
+            const productDetails = await getProductDetails(cartDetails.id);
+            const quantity = cartDetails.quantity;
+            totalQuantityValue += quantity;
+            totalPriceValue += productDetails.price * quantity;
+            appendProduct(productDetails, cartDetails);
         }
         totalQuantityDisplay.innerText = totalQuantityValue;
         totalPriceDisplay.innerText = totalPriceValue;
@@ -65,14 +96,9 @@ await displayCartProducts();
 const cartQuantityInputs = document.querySelectorAll(".itemQuantity");
 const cartDeleteBtns = document.querySelectorAll(".deleteItem");
 
-function getCartDetails(id, color) {
-    const cartDetailsJson = localStorage.getItem(`${id} - ${color}`);
-    return JSON.parse(cartDetailsJson);
-}
-
 async function getProductPrice(id) {
     try {
-        const product = await getProduct(id);
+        const product = await getProductDetails(id);
         return parseInt(product.price);
     } catch (error) {
         console.log(error);
@@ -93,27 +119,25 @@ function getIdAndColor(element) {
     const parentElement = element.closest('article');
     const id = parentElement.dataset.id;
     const color = parentElement.dataset.color;
-    return { id: id, color: color };
+    return { id, color };
 }
 
 for (let i = 0; i < cartQuantityInputs.length; i++) {
     cartQuantityInputs[i].addEventListener("change", async function () {
         try {
             const newQuantity = parseFloat(this.value);
-            const storedQuantity = individualItemQuantity[i];
+            const { id, color } = getIdAndColor(this);
+            const storedQuantity = cart.getQuantity(id, color);
             if (!Number.isInteger(newQuantity) || this.value < 1 || this.value > 100) {
                 alert("La quantité d'articles doit être un nombre entier compris entre 1 et 100");
                 this.value = storedQuantity;
             }
             else {
                 const quantityDifference = storedQuantity - newQuantity;
-                const { id, color } = getIdAndColor(this);
-                const cartDetails = getCartDetails(id, color);
-                cartDetails.quantity = newQuantity;
-                localStorage.setItem(`${id} - ${color}`, JSON.stringify(cartDetails))
+                cart.changeQuantity(id, color, newQuantity);
                 updateTotalPrice(await getProductPrice(id), quantityDifference);
                 updateTotalQuantity(quantityDifference);
-                individualItemQuantity[i] = newQuantity;
+                cart.changeQuantity(id, color, newQuantity);
             }
         } catch (error) {
             console.log(error);
@@ -124,12 +148,12 @@ for (let i = 0; i < cartQuantityInputs.length; i++) {
 for (let i = 0; i < cartDeleteBtns.length; i++) {
     cartDeleteBtns[i].addEventListener("click", async function () {
         try {
-            const currentQuantity = individualItemQuantity[i];
-            let { id, color } = getIdAndColor(this);
-            updateTotalPrice(await getProductPrice(id), currentQuantity);
-            updateTotalQuantity(currentQuantity);
+            const { id, color } = getIdAndColor(this);
+            const storedQuantity = cart.getQuantity(id, color);
+            updateTotalPrice(await getProductPrice(id), storedQuantity);
+            updateTotalQuantity(storedQuantity);
             this.closest("article").remove();
-            localStorage.removeItem(`${id} - ${color}`);
+            cart.remove(id, color);
         } catch (error) {
             console.log(error);
         }
@@ -174,10 +198,6 @@ emailInput.addEventListener("change", function () {
     }
 })
 
-// /^[a-zéèêàâôùûìî-]+$/i test prénom, nom, ville
-// /^\d+[a-zA-Z]*(( )?/w+)+$/ test adresse
-// /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ test adresse email
-
 const orderBtn = document.getElementById("order");
 
 async function sendOrder(request) {
@@ -190,8 +210,7 @@ async function sendOrder(request) {
             },
             body: JSON.stringify(request)
         });
-        const orderInfo = await res.json();
-        return orderInfo;
+        return await res.json();
     } catch (error) {
         console.log(error);
     }
@@ -202,24 +221,22 @@ orderBtn.addEventListener("click", async function (e) {
     try {
         e.preventDefault();
         if (firstNameInput.value && lastNameInput.value && addressInput.value && emailInput.value && cityInput.value) {
-            const cartItems = document.querySelectorAll(".cart__item");
-            let contact = {
-                firstName: firstNameInput.value,
-                lastName: lastNameInput.value,
-                address: addressInput.value,
-                city: cityInput.value,
-                email: emailInput.value
-            }
-            let products = [];
-            for (let i = 0; i < cartItems.length; i++) {
-                products.push(cartItems[i].dataset.id);
-            }
-            let body = {
-                contact: contact,
-                products: products
-            }
-            const orderInfo = await sendOrder(body);
-            window.location = `./confirmation.html?orderId=${orderInfo.orderId}`
+            if (localStorage.length) {
+                let contact = {
+                    firstName: firstNameInput.value,
+                    lastName: lastNameInput.value,
+                    address: addressInput.value,
+                    city: cityInput.value,
+                    email: emailInput.value
+                }
+                let products = cart.cart.map(e => e.id);
+                let body = {
+                    contact: contact,
+                    products: products
+                }
+                const orderInfo = await sendOrder(body);
+                window.location = `./confirmation.html?orderId=${orderInfo.orderId}`
+            } else alert("Votre panier est vide !")
         } else {
             alert("Veuillez renseigner tous les champs du formulaire")
         }

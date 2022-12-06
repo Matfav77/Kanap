@@ -56,42 +56,54 @@ appendProductDetails();
 const quantityInput = document.getElementById("quantity");
 const addToCartBtn = document.getElementById("addToCart");
 
-function registerOrderToCart(key, order) {
-    const orderJson = JSON.stringify(order);
-    localStorage.setItem(key, orderJson);
+class Cart {
+    constructor() {
+        let cart = localStorage.getItem("cart");
+        if (!cart) this.cart = []
+        else this.cart = JSON.parse(cart)
+    }
+
+    save() {
+        localStorage.setItem("cart", JSON.stringify(this.cart))
+    }
+
+    add(product) {
+        let storedProduct = this.cart.find(e => e.id === product.id && e.color === product.color);
+        if (!storedProduct) {
+            this.cart.push(product);
+            this.save();
+            alert("Votre sélection a bien été ajoutée au panier !");
+        } else {
+            if (storedProduct.quantity + product.quantity > 100) {
+                alert(`Vous ne pouvez avoir plus de 100 exemplaires d'un même produit dans le panier. Vous avez déjà ${storedProduct.quantity} exemplaires de ce produit dans le panier. Vous pouvez en ajouter ${100 - storedProduct.quantity} au maximum.`);
+                quantityInput.value = 0;
+            } else {
+                storedProduct.quantity += product.quantity;
+                this.save();
+                quantityInput.value = 0;
+                alert(`Vous avez ajouté ${product.quantity} exemplaires de ce produit à votre panier. Votre panier en contient à présent ${storedProduct.quantity} exemplaires.`);
+            }
+        }
+    }
+
 }
+
+let cart = new Cart();
 
 addToCartBtn.addEventListener('click', function () {
     if (!Number.isInteger(parseFloat(quantityInput.value)) || quantityInput.value < 1 || quantityInput.value > 100) {
-        alert("La quantité d'articles doit être un nombre entier compris entre 1 et 100");
+        alert("La quantité d'articles doit être un nombre entier compris entre 1 et 100.");
         quantityInput.value = 0;
     } else if (!itemColorPicker.value) {
         alert("Veuillez choisir une couleur.")
     } else {
         const color = itemColorPicker.value;
         const quantity = parseInt(quantityInput.value);
-        const storageKey = `${id} - ${color}`;
-        if (localStorage.getItem(storageKey)) {
-            const storedItem = JSON.parse(localStorage.getItem(storageKey));
-            if (storedItem.quantity + quantity > 100) {
-                alert(`Vous ne pouvez avoir plus de 100 exemplaires d'un même produit dans le panier. Vous avez déjà ${storedItem.quantity} exemplaires de ce produit dans le panier. Vous pouvez en ajouter ${100 - storedItem.quantity} au maximum.`);
-                quantityInput.value = 0;
-            } else {
-                storedItem.quantity += quantity;
-                registerOrderToCart(storageKey, storedItem);
-                quantityInput.value = 0;
-                alert(`Vous avez ajouté ${quantity} exemplaires de ce produit à votre panier. Votre panier en contient à présent ${storedItem.quantity} exemplaires.`);
-            }
-        }
-        else {
-            let order = {
-                id: id,
-                color: color,
-                quantity: quantity
-            };
-            registerOrderToCart(storageKey, order);
-            quantityInput.value = 0;
-            alert("Votre sélection a bien été ajoutée au panier !")
-        }
+        const product = {
+            id: id,
+            color: color,
+            quantity: quantity
+        };
+        cart.add(product);
     }
 })
