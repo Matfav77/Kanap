@@ -40,14 +40,14 @@ export class Cart {
     }
 
     getQuantity(id, color) {
-        let foundProduct = this.getItem(id, color);
-        return foundProduct.quantity;
+        let foundItem = this.getItem(id, color);
+        return foundItem.quantity;
     }
 
     changeQuantity(id, color, quantity) {
-        let productQuantity = this.getQuantity(id, color);
-        productQuantity = quantity;
-        this.save()
+        let foundItem = this.getItem(id, color)
+        foundItem.quantity = quantity;
+        this.save();
     }
 }
 

@@ -10,18 +10,6 @@ const itemPrice = document.getElementById("price");
 const itemDescription = document.getElementById("description");
 const itemColorPicker = document.getElementById("colors");
 
-// async function getProduct() {
-//     try {
-//         const response = await fetch(`http://127.0.0.1:3000/api/products/${id}`);
-//         return await response.json();
-//     }
-//     catch (e) {
-//         console.log(e);
-//     }
-// }
-
-
-
 // Fonction, arguments, renvoi 
 function appendImg(product) {
     const img = document.createElement("img");

@@ -26,3 +26,20 @@ export async function getProductPrice(id) {
         console.log(error);
     }
 }
+
+export async function sendOrder(request) {
+    try {
+        const res = await fetch("http://127.0.0.1:3000/api/products/order", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(request)
+        });
+        return await res.json();
+    } catch (error) {
+        console.log(error);
+    }
+
+}

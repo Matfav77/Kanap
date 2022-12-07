@@ -1,5 +1,5 @@
 import { Cart } from "./utils/Cart.js";
-import { getProductDetails, getProductPrice } from "./utils/api-queries.js";
+import { getProductDetails, getProductPrice, sendOrder } from "./utils/api-queries.js";
 
 const cartDisplay = document.getElementById("cart__items");
 const totalQuantityDisplay = document.getElementById("totalQuantity");
@@ -56,15 +56,6 @@ await displayCartProducts();
 const cartQuantityInputs = document.querySelectorAll(".itemQuantity");
 const cartDeleteBtns = document.querySelectorAll(".deleteItem");
 
-// async function getProductPrice(id) {
-//     try {
-//         const product = await getProductDetails(id);
-//         return parseInt(product.price);
-//     } catch (error) {
-//         console.log(error);
-//     }
-// }
-
 function updateTotalPrice(price, quantity) {
     totalPriceValue -= price * quantity;
     totalPriceDisplay.innerText = totalPriceValue;
@@ -94,7 +85,6 @@ for (let i = 0; i < cartQuantityInputs.length; i++) {
             }
             else {
                 const quantityDifference = storedQuantity - newQuantity;
-                cart.changeQuantity(id, color, newQuantity);
                 updateTotalPrice(await getProductPrice(id), quantityDifference);
                 updateTotalQuantity(quantityDifference);
                 cart.changeQuantity(id, color, newQuantity);
@@ -121,81 +111,76 @@ for (let i = 0; i < cartDeleteBtns.length; i++) {
 }
 
 const firstNameInput = document.getElementById("firstName");
+const firstNameErrorDisplay = document.getElementById("firstNameErrorMsg");
 const lastNameInput = document.getElementById("lastName");
+const lastNameErrorDisplay = document.getElementById("lastNameErrorMsg");
 const addressInput = document.getElementById("address");
+const addressErrorDisplay = document.getElementById("addressErrorMsg");
 const cityInput = document.getElementById("city");
+const cityErrorDisplay = document.getElementById("cityErrorMsg");
 const emailInput = document.getElementById("email");
+const emailErrorDisplay = document.getElementById("emailErrorMsg");
 
-firstNameInput.addEventListener("change", function () {
-    if (!/^[a-zéèêàâôùûìî-]+$/i.test(firstNameInput.value)) {
-        alert("Le prénom n'est pas au bon format.");
-        firstNameInput.value = "";
-    }
-})
-lastNameInput.addEventListener("change", function () {
-    if (!/^[a-zçéèêàâôùûìî-]+$/i.test(lastNameInput.value)) {
-        alert("Le nom de famille n'est pas au bon format.");
-        lastNameInput.value = "";
-    }
-})
+function isFirstNameValid() {
+    const isValid = (/^[a-zéèêàâôùûìî-]+$/i.test(firstNameInput.value));
+    if (!isValid) firstNameErrorDisplay.innerText = "Le prénom n'est pas au bon format.";
+    else firstNameErrorDisplay.innerText = "";
+    return isValid
+}
 
-addressInput.addEventListener("change", function () {
-    if (!/^\d+[a-z]*(\s{1}[a-zçéèêàâôùûìî-]+)+$/i.test(addressInput.value)) {
-        alert("L'adresse n'est pas au bon format.");
-        addressInput.value = "";
-    }
-})
-cityInput.addEventListener("change", function () {
-    if (!/^[a-zéèêàâôùûìî-]+$/i.test(cityInput.value)) {
-        alert("Le nom de ville n'est pas au bon format.");
-        cityInput.value = "";
-    }
-})
-emailInput.addEventListener("change", function () {
-    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailInput.value)) {
-        alert("L'adresse email n'est pas au bon format.");
-        emailInput.value = "";
-    }
-})
+function isLastNameValid() {
+    const isValid = (/^[a-zéèêàâôùûìî-]+$/i.test(lastNameInput.value));
+    if (!isValid) lastNameErrorDisplay.innerText = "Le nom de famille n'est pas au bon format.";
+    else lastNameErrorDisplay.innerText = "";
+    return isValid
+}
+function isAddressValid() {
+    const isValid = (/\w+/i.test(addressInput.value));
+    if (!isValid) addressErrorDisplay.innerText = "L'adresse n'est pas au bon format.";
+    else addressErrorDisplay.innerText = "";
+    return isValid
+}
+function isCityValid() {
+    const isValid = (/^[a-zéèêàâôùûìî\s{1}-]+$/i.test(cityInput.value));
+    if (!isValid) cityErrorDisplay.innerText = "Le nom de ville n'est pas au bon format.";
+    else cityErrorDisplay.innerText = "";
+    return isValid
+}
+function isEmailValid() {
+    const isValid = (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailInput.value));
+    if (!isValid) emailErrorDisplay.innerText = "L'email n'est pas au bon format.";
+    else emailErrorDisplay.innerText = "";
+    return isValid
+}
 
 const orderBtn = document.getElementById("order");
-
-async function sendOrder(request) {
-    try {
-        const res = await fetch("http://127.0.0.1:3000/api/products/order", {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(request)
-        });
-        return await res.json();
-    } catch (error) {
-        console.log(error);
-    }
-
-}
 
 orderBtn.addEventListener("click", async function (e) {
     try {
         e.preventDefault();
-        if (firstNameInput.value && lastNameInput.value && addressInput.value && emailInput.value && cityInput.value) {
+        const firstName = firstNameInput.value;
+        const lastName = lastNameInput.value;
+        const address = addressInput.value;
+        const city = cityInput.value;
+        const email = emailInput.value;
+        if (firstName && lastName && address && email && city) {
             if (localStorage.length) {
-                let contact = {
-                    firstName: firstNameInput.value,
-                    lastName: lastNameInput.value,
-                    address: addressInput.value,
-                    city: cityInput.value,
-                    email: emailInput.value
+                if (isFirstNameValid() && isLastNameValid() && isAddressValid() && isCityValid() && isEmailValid()) {
+                    let contact = {
+                        firstName,
+                        lastName,
+                        address,
+                        city,
+                        email
+                    }
+                    let products = cart.cart.map(e => e.id);
+                    let body = {
+                        contact,
+                        products
+                    }
+                    const orderInfo = await sendOrder(body);
+                    window.location = `./confirmation.html?orderId=${orderInfo.orderId}`
                 }
-                let products = cart.cart.map(e => e.id);
-                let body = {
-                    contact: contact,
-                    products: products
-                }
-                const orderInfo = await sendOrder(body);
-                window.location = `./confirmation.html?orderId=${orderInfo.orderId}`
             } else alert("Votre panier est vide !")
         } else {
             alert("Veuillez renseigner tous les champs du formulaire")
