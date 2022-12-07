@@ -1,21 +1,11 @@
-import { Cart } from "./objects/Cart.js";
+import { Cart } from "./utils/Cart.js";
+import { getProductDetails, getProductPrice } from "./utils/api-queries.js";
 
 const cartDisplay = document.getElementById("cart__items");
 const totalQuantityDisplay = document.getElementById("totalQuantity");
 let totalQuantityValue = 0;
 const totalPriceDisplay = document.getElementById("totalPrice");
 let totalPriceValue = 0;
-
-async function getProductDetails(id) {
-    try {
-        const response = await fetch(`http://127.0.0.1:3000/api/products/${id}`);
-        return await response.json();
-    }
-    catch (e) {
-        console.log(e);
-    }
-}
-
 
 let cart = new Cart();
 
@@ -66,14 +56,14 @@ await displayCartProducts();
 const cartQuantityInputs = document.querySelectorAll(".itemQuantity");
 const cartDeleteBtns = document.querySelectorAll(".deleteItem");
 
-async function getProductPrice(id) {
-    try {
-        const product = await getProductDetails(id);
-        return parseInt(product.price);
-    } catch (error) {
-        console.log(error);
-    }
-}
+// async function getProductPrice(id) {
+//     try {
+//         const product = await getProductDetails(id);
+//         return parseInt(product.price);
+//     } catch (error) {
+//         console.log(error);
+//     }
+// }
 
 function updateTotalPrice(price, quantity) {
     totalPriceValue -= price * quantity;

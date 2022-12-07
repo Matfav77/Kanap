@@ -22,11 +22,9 @@ export class Cart {
         } else {
             if (storedProduct.quantity + product.quantity > 100) {
                 alert(`Vous ne pouvez avoir plus de 100 exemplaires d'un même produit dans le panier. Vous avez déjà ${storedProduct.quantity} exemplaires de ce produit dans le panier. Vous pouvez en ajouter ${100 - storedProduct.quantity} au maximum.`);
-                quantityInput.value = 0;
             } else {
                 storedProduct.quantity += product.quantity;
                 this.save();
-                quantityInput.value = 0;
                 alert(`Vous avez ajouté ${product.quantity} exemplaires de ce produit à votre panier. Votre panier en contient à présent ${storedProduct.quantity} exemplaires.`);
             }
         }

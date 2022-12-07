@@ -1,4 +1,5 @@
-import { Cart } from "./objects/Cart.js";
+import { Cart } from "./utils/Cart.js";
+import { getProductDetails } from "./utils/api-queries.js";
 
 const params = new URL(window.location.href).search;
 const id = new URLSearchParams(params).get("id");
@@ -9,15 +10,17 @@ const itemPrice = document.getElementById("price");
 const itemDescription = document.getElementById("description");
 const itemColorPicker = document.getElementById("colors");
 
-async function getProduct() {
-    try {
-        const response = await fetch(`http://127.0.0.1:3000/api/products/${id}`);
-        return await response.json();
-    }
-    catch (e) {
-        console.log(e);
-    }
-}
+// async function getProduct() {
+//     try {
+//         const response = await fetch(`http://127.0.0.1:3000/api/products/${id}`);
+//         return await response.json();
+//     }
+//     catch (e) {
+//         console.log(e);
+//     }
+// }
+
+
 
 // Fonction, arguments, renvoi 
 function appendImg(product) {
@@ -44,7 +47,7 @@ function appendColors(product) {
 
 async function appendProductDetails() {
     try {
-        const product = await getProduct();
+        const product = await getProductDetails(id);
         appendImg(product);
         appendNamePriceDescription(product);
         appendColors(product);
@@ -77,5 +80,6 @@ addToCartBtn.addEventListener('click', function () {
             quantity: quantity
         };
         cart.add(product);
+        quantityInput.value = 0;
     }
 })
