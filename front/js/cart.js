@@ -1,3 +1,5 @@
+import { Cart } from "./objects/Cart.js";
+
 const cartDisplay = document.getElementById("cart__items");
 const totalQuantityDisplay = document.getElementById("totalQuantity");
 let totalQuantityValue = 0;
@@ -14,42 +16,6 @@ async function getProductDetails(id) {
     }
 }
 
-class Cart {
-    constructor() {
-        let cart = localStorage.getItem("cart");
-        if (!cart) this.cart = []
-        else this.cart = JSON.parse(cart).sort((a, b) => {
-            if (a.id < b.id) return -1
-            else if (a.id > b.id) return 1
-            else return 0
-        });
-    }
-
-    save() {
-        localStorage.setItem("cart", JSON.stringify(this.cart))
-    }
-
-    getItem(id, color) {
-        return this.cart.find(e => e.id === id && e.color === color)
-    }
-
-    remove(id, color) {
-        this.cart = this.cart.filter(product => product.id != id || product.color != color);
-        this.save();
-    }
-
-    getQuantity(id, color) {
-        let foundProduct = this.getItem(id, color);
-        return foundProduct.quantity;
-    }
-
-    changeQuantity(id, color, quantity) {
-        let productQuantity = this.getQuantity(id, color);
-        productQuantity = quantity;
-        this.save()
-    }
-
-}
 
 let cart = new Cart();
 

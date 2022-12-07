@@ -1,3 +1,5 @@
+import { Cart } from "./objects/Cart.js";
+
 const params = new URL(window.location.href).search;
 const id = new URLSearchParams(params).get("id");
 
@@ -17,6 +19,7 @@ async function getProduct() {
     }
 }
 
+// Fonction, arguments, renvoi 
 function appendImg(product) {
     const img = document.createElement("img");
     img.src = product.imageUrl;
@@ -56,37 +59,6 @@ appendProductDetails();
 const quantityInput = document.getElementById("quantity");
 const addToCartBtn = document.getElementById("addToCart");
 
-class Cart {
-    constructor() {
-        let cart = localStorage.getItem("cart");
-        if (!cart) this.cart = []
-        else this.cart = JSON.parse(cart)
-    }
-
-    save() {
-        localStorage.setItem("cart", JSON.stringify(this.cart))
-    }
-
-    add(product) {
-        let storedProduct = this.cart.find(e => e.id === product.id && e.color === product.color);
-        if (!storedProduct) {
-            this.cart.push(product);
-            this.save();
-            alert("Votre sélection a bien été ajoutée au panier !");
-        } else {
-            if (storedProduct.quantity + product.quantity > 100) {
-                alert(`Vous ne pouvez avoir plus de 100 exemplaires d'un même produit dans le panier. Vous avez déjà ${storedProduct.quantity} exemplaires de ce produit dans le panier. Vous pouvez en ajouter ${100 - storedProduct.quantity} au maximum.`);
-                quantityInput.value = 0;
-            } else {
-                storedProduct.quantity += product.quantity;
-                this.save();
-                quantityInput.value = 0;
-                alert(`Vous avez ajouté ${product.quantity} exemplaires de ce produit à votre panier. Votre panier en contient à présent ${storedProduct.quantity} exemplaires.`);
-            }
-        }
-    }
-
-}
 
 let cart = new Cart();
 
