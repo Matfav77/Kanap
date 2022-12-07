@@ -2,7 +2,7 @@ import { getAllProducts } from "./utils/api-queries.js";
 
 const itemDisplay = document.getElementById("items");
 
-function appendProduct(product) {
+function appendProduct(product) { // Appends a product's details with a template literal, using product object from DB
     itemDisplay.innerHTML += `
     <a href="./product.html?id=${product._id}">
             <article>
@@ -13,7 +13,7 @@ function appendProduct(product) {
           </a>`;
 }
 
-async function displayAllProducts() {
+async function displayAllProducts() { // Loops through all products in DB and calls append function on each one.
     try {
         const allProducts = await getAllProducts();
         for (let product of allProducts) {

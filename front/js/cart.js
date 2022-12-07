@@ -9,7 +9,7 @@ let totalPriceValue = 0;
 
 let cart = new Cart();
 
-function appendProduct(productDetails, cartDetails) {
+function appendProduct(productDetails, cartDetails) { // Appends a product's cart details, and associated DB details, to the page
     cartDisplay.innerHTML += `
     <article class="cart__item" data-id="${productDetails._id}" data-color="${cartDetails.color}">
                 <div class="cart__item__img">
@@ -34,7 +34,7 @@ function appendProduct(productDetails, cartDetails) {
               </article>`
 }
 
-async function displayCartProducts() {
+async function displayCartProducts() { // On page load: displays all products in the cart using append function, handles total price and total quantity.
     try {
         for (let cartDetails of cart.cart) {
             const productDetails = await getProductDetails(cartDetails.id);
@@ -66,14 +66,14 @@ function updateTotalQuantity(quantity) {
     totalQuantityDisplay.innerText = totalQuantityValue;
 }
 
-function getIdAndColor(element) {
+function getIdAndColor(element) { // Gets id and color of a product (stored as dataset in HTML), from a child element within the product's display
     const parentElement = element.closest('article');
     const id = parentElement.dataset.id;
     const color = parentElement.dataset.color;
     return { id, color };
 }
 
-for (let i = 0; i < cartQuantityInputs.length; i++) {
+for (let i = 0; i < cartQuantityInputs.length; i++) { // Handles change in a product's quantity, checks that new quantity is integer between 1 - 100, updates total price and quantity, updates localStorage.
     cartQuantityInputs[i].addEventListener("change", async function () {
         try {
             const newQuantity = parseFloat(this.value);
@@ -95,7 +95,7 @@ for (let i = 0; i < cartQuantityInputs.length; i++) {
     })
 }
 
-for (let i = 0; i < cartDeleteBtns.length; i++) {
+for (let i = 0; i < cartDeleteBtns.length; i++) { // Handles deletion of product from the DOM and from localStorage, updates total price and quantity.
     cartDeleteBtns[i].addEventListener("click", async function () {
         try {
             const { id, color } = getIdAndColor(this);
@@ -120,6 +120,8 @@ const cityInput = document.getElementById("city");
 const cityErrorDisplay = document.getElementById("cityErrorMsg");
 const emailInput = document.getElementById("email");
 const emailErrorDisplay = document.getElementById("emailErrorMsg");
+
+// The following functions check that each input of the form is valid with RegEx, displaying error message when false, returning boolean result of check.
 
 function isFirstNameValid() {
     const isValid = (/^[a-zéèêàâôùûìî-]+$/i.test(firstNameInput.value));
@@ -155,8 +157,8 @@ function isEmailValid() {
 
 const orderBtn = document.getElementById("order");
 
-orderBtn.addEventListener("click", async function (e) {
-    try {
+orderBtn.addEventListener("click", async function (e) { // Handles 'order' action, checks that all form inputs are filled in, then that basket is not empty, then that inputs are valid
+    try {                                               // and sends to confirmation page with orderID in query string.
         e.preventDefault();
         const firstName = firstNameInput.value;
         const lastName = lastNameInput.value;
