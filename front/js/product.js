@@ -28,9 +28,7 @@ function appendNamePriceDescription(product) {
 // Generates colour options from product details and appends them to the selector
 function appendColors(product) {
     for (let color of product.colors) {
-        const newOption = document.createElement("option");
-        newOption.value = color;
-        newOption.innerText = color;
+        const newOption = new Option(color, color);
         productColorPicker.appendChild(newOption);
     }
 }
@@ -55,7 +53,15 @@ const addToCartBtn = document.getElementById("addToCart");
 
 let cart = new Cart();
 
-// Handles 'add to cart' event, checking that value in input is integer between 1 and 100 and that a color is selected, check method add in Cart.js for further validations.
+class Product {
+    constructor(id, color, quantity) {
+        this.id = id,
+            this.color = color,
+            this.quantity = quantity
+    }
+}
+
+// Handles 'add to cart' event, checking that value in input is integer between 1 and 100 and that a color is selected, see method 'add' in Cart.js for further validations.
 addToCartBtn.addEventListener('click', function () {
     if (!Number.isInteger(parseFloat(quantityInput.value)) || quantityInput.value < 1 || quantityInput.value > 100) {
         alert("La quantité d'articles doit être un nombre entier compris entre 1 et 100.");
@@ -65,11 +71,7 @@ addToCartBtn.addEventListener('click', function () {
     } else {
         const color = productColorPicker.value;
         const quantity = parseInt(quantityInput.value);
-        const product = {
-            id: id,
-            color: color,
-            quantity: quantity
-        };
+        const product = new Product(id, color, quantity);
         cart.add(product);
         quantityInput.value = 0;
     }

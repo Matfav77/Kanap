@@ -166,7 +166,8 @@ orderBtn.addEventListener("click", async function (e) { // Handles 'order' actio
         const city = cityInput.value;
         const email = emailInput.value;
         if (firstName && lastName && address && email && city) {
-            if (localStorage.length) {
+            if (cart.isEmpty()) alert("Votre panier est vide !")
+            else {
                 if (isFirstNameValid() && isLastNameValid() && isAddressValid() && isCityValid() && isEmailValid()) {
                     let contact = {
                         firstName,
@@ -183,7 +184,7 @@ orderBtn.addEventListener("click", async function (e) { // Handles 'order' actio
                     const orderInfo = await sendOrder(body);
                     window.location = `./confirmation.html?orderId=${orderInfo.orderId}`
                 }
-            } else alert("Votre panier est vide !")
+            }
         } else {
             alert("Veuillez renseigner tous les champs du formulaire")
         }

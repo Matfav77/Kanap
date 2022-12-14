@@ -49,5 +49,10 @@ export class Cart {
         foundItem.quantity = quantity;
         this.save();
     }
+
+    isEmpty() {
+        if (this.cart.length === 0) return true
+        return false
+    }
 }
 
