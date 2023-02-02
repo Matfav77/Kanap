@@ -2,7 +2,7 @@
 
 This is the front end and back end server for Project 5 of the Web Developer path.
 
-The frontend was provided upfront, and the backend needed to be built from scratch, via a RESTful API using Node.js and Express.
+The backend was provided upfront, as a REST API with pre-built routes and specifications. The frontend skeleton was provided, this project required the use of plain JS to dynamically display all the elements provided by the backend.
 
 ### Back end Prerequisites ###
 
