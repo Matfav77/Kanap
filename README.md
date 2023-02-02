@@ -2,6 +2,8 @@
 
 This is the front end and back end server for Project 5 of the Web Developer path.
 
+The frontend was provided upfront, and the backend needed to be built from scratch, via a RESTful API using Node.js and Express.
+
 ### Back end Prerequisites ###
 
 You will need to have Node and `npm` installed locally on your machine.
